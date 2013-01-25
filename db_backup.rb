@@ -12,5 +12,5 @@ else
 end
 
 `mysqldump -u#{username} -p#{password} #{database} > #{backup_file}.sql`
-`gzip #{backup_file.sql}`
+`gzip #{backup_file}.sql`
 
