@@ -7,7 +7,11 @@ options = {}
 option_parser = OptionParser.new do |opts|
 
   executable_name = File.basename($PROGRAM_NAME)
-  opts.banner = "Usage: #{executable_name} [options] database_name"
+  opts.banner = "Backup one or more MySQL databases
+
+Usage: #{executable_name} [options] database_name
+
+"
 
 	# Create a switch
 	opts.on("-i", "--iteration", 'Indicate that this backup is an "iteration" backup') do
@@ -26,19 +30,27 @@ option_parser = OptionParser.new do |opts|
 end
 
 option_parser.parse!
-puts options.inspect
-
-database = ARGV.shift
-username = ARGV.shift
-password = ARGV.shift
-end_of_iter = ARGV.shift
-
-if end_of_iter.nil?
-  backup_file = database + Time.now.strftime("%Y%m%d")
+if ARGV.empty?
+	puts "error: you must supply a database_name"
+	puts
+	puts option_parser.help
 else
-  backup_file = database + end_of_iter
+	database_name = ARGV[0]
+	# proceed as normal to backup database_name
+
+  puts options.inspect
+
+  database = ARGV.shift
+  username = ARGV.shift
+  password = ARGV.shift
+  end_of_iter = ARGV.shift
+
+  if end_of_iter.nil?
+    backup_file = database + Time.now.strftime("%Y%m%d")
+  else
+    backup_file = database + end_of_iter
+  end
+
+  `mysqldump -u#{username} -p#{password} #{database} > #{backup_file}.sql`
+  `gzip #{backup_file}.sql`
 end
-
-`mysqldump -u#{username} -p#{password} #{database} > #{backup_file}.sql`
-`gzip #{backup_file}.sql`
-
